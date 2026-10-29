@@ -30,7 +30,7 @@ h1{font:500 26px/1.35 var(--sans);letter-spacing:-.03em;margin:0 0 4px}
 .ln{width:26px;height:0;border-top:2px solid var(--ink);display:inline-block}
 .ln.d{border-top-style:dashed}
 .diagram{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:10px;overflow:auto}
-svg{display:block;width:100%;height:auto;min-width:760px}
+svg{display:block;width:100%;height:auto;min-width:640px}
 svg text{font-family:var(--sans)}
 .t{fill:var(--ink);font-size:13px;paint-order:stroke;stroke:var(--card);stroke-width:5px;stroke-linejoin:round}
 .t2{fill:var(--mu);font-size:11.5px;paint-order:stroke;stroke:var(--card);stroke-width:5px;stroke-linejoin:round}
@@ -45,12 +45,21 @@ svg text{font-family:var(--sans)}
 .rule{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px 16px;font-size:14px;word-break:keep-all}
 .rule b{display:block;margin-bottom:2px}
 @media (max-width:720px){.rules{grid-template-columns:1fr}}
+.notes{display:grid;gap:12px;margin-top:16px}
+.blk{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 20px;font-size:14px;word-break:keep-all}
+.blk h2{font:600 16px/1.4 var(--sans);margin:0 0 8px}
+.blk h2 small{color:var(--mu);font-weight:400;font-size:12px;margin-left:6px}
+.blk ul{margin:4px 0 4px;padding-left:20px}
+.blk li{margin:4px 0}
+.blk em{font-style:normal;font-weight:600;color:var(--c-claude);margin-right:6px}
+.blk code{background:var(--chip);padding:1px 5px;border-radius:5px;font-size:13px}
+.one{font-weight:600;margin:8px 0 0}
 </style>
 </head>
 <body>
 <div class="wrap">
   <h1>미팅 노트 스킬 — 실행 시퀀스</h1>
-  <p class="sub">"이 미팅 노트 앱으로 보내줘"라고 말하면 일어나는 일을 순서대로 정리했어요. 스킬은 <b>초안까지만</b> 만들고, 공개(승인)는 사람이 앱에서 합니다.</p>
+  <p class="sub">"이 미팅 노트 앱으로 보내줘" 요청 시 처리 흐름 요약 스킬은 <b>초안 생성까지만</b> 수행, 공개(승인)는 담당자가 앱에서 직접 처리</p>
   <div class="legend">
     <span><i class="ln"></i> 요청</span>
     <span><i class="ln d"></i> 응답·결과</span>
@@ -59,66 +68,71 @@ svg text{font-family:var(--sans)}
     <span><i class="sw" style="background:var(--note);border:1px solid var(--line)"></i> 처리 내용(메모)</span>
   </div>
   <div class="diagram"><svg id="seq" role="img" aria-label="미팅 노트 스킬 실행 시퀀스 다이어그램"></svg></div>
-  <div class="rules">
-    <div class="rule"><b>원문은 앱에 보내지 않아요</b>앱에는 정리된 결과(제목·참여자·요약·액션아이템)만 전달돼요. 원문은 내 Drive 폴더에만 남아요.</div>
-    <div class="rule"><b>자동은 "초안"까지예요</b>승인하기 전에는 참여자에게 보이지 않아요. 같은 파일을 다시 보내도 중복되지 않아요.</div>
-    <div class="rule"><b>키는 화면에 출력하지 않아요</b>자동화 키는 요청 헤더로만 쓰고, 보고나 파일에 적지 않아요.</div>
+  <div class="notes">
+    <section class="blk">
+      <h2>판단이 필요한 쟁점과 대응 방안</h2>
+      <ul>
+        <li><b>미팅 대화의 외부 AI 전송 가능 여부</b>
+          <ul>
+            <li><em>판단</em> 이름·업무 내용은 개인정보·영업비밀 가능성 자동 경로는 Claude 분석 방식으로 이름 가리기(가명처리) 적용 불가</li>
+            <li><em>극복</em> 사용자가 직접 "보내줘"라고 요청한 대화만 처리 외부 AI 전송 사실 앱 내 고지 시연은 가상 미팅만 사용 직접 붙여넣기 경로는 이름 가리기(참여자N) 옵션 제공</li>
+          </ul></li>
+        <li><b>원문의 앱 저장 가능 여부</b>
+          <ul>
+            <li><em>판단</em> 원문까지 앱에 보관 시 유출 피해 확대 앱에 필요한 정보는 정리 결과뿐</li>
+            <li><em>극복</em> 앱에는 요약·결정·액션아이템만 저장 원문은 본인 Drive에만 보관 삭제는 수동</li>
+          </ul></li>
+        <li><b>AI 추출 할 일의 참여자 직접 전달 가능 여부</b>
+          <ul>
+            <li><em>판단</em> 담당자·기한 오지정 시 참여자가 의도치 않은 업무 수행 책임이 수반되는 판단</li>
+            <li><em>극복</em> 자동 입력은 항상 "초안" 생성 승인 전 비공개 담당자 미지정 시 승인 불가</li>
+          </ul></li>
+        <li><b>웹앱의 공개 URL 게시 가능 여부</b>
+          <ul><li><em>극복</em> 관리자 비밀번호 인증, 참여자별 초대 링크(해시 저장·재발급), DB 공개 접근 차단</li></ul></li>
+        <li><b>키 유출 및 비용</b> 키는 요청 헤더로만 전송 시간당 30건, 입력 20,000자 제한</li>
+      </ul>
+    </section>
+    <section class="blk">
+      <h2>개발 과정의 시행착오와 개선</h2>
+      <ul>
+        <li>초기 구현: 대화 붙여넣기 방식 앱 실제 요구사항은 "Drive 저장 시 필드 자동 입력" 요구사항 오해석</li>
+        <li>이후 조치: 자동 수집 경로, 초안함, 신규 미팅 알림 팝업 추가</li>
+        <li>클라우드 실행 시 <code>G:</code> 드라이브·키 부재로 실패 Drive 커넥터 대체 경로 추가로 해결</li>
+        <li>경로 차단 시 대체 방안을 하나씩 검증하며 개선</li>
+      </ul>
+    </section>
+    <section class="blk">
+      <h2>핵심 요약</h2>
+      <p class="one">입력 부담 없는 미팅 내용 → 참여자별 할 일 자동 정리 서비스 업무 배정은 담당자 승인 후 확정</p>
+    </section>
   </div>
 </div>
 
 <script>
 // 시퀀스 다이어그램을 데이터로 그립니다. 단계를 고치려면 아래 STEPS만 바꾸면 됩니다.
 const NS = 'http://www.w3.org/2000/svg';
-const W = 1040, GUT = 44, COLW = (W - GUT - 8) / 5;
+const W = 1040, GUT = 44, COLW = (W - GUT - 8) / 4;
 const ACT = [
-  { id: 'user',   name: '사용자',          sub: '요청·확인',        c: 'var(--c-user)' },
-  { id: 'claude', name: 'Claude (스킬)',   sub: '저장·분석·제출',   c: 'var(--c-claude)' },
+  { id: 'user',   name: '사용자',          sub: '요청 · 승인',        c: 'var(--c-user)' },
+  { id: 'claude', name: 'Claude (스킬)',   sub: '저장 · 분석 · 제출', c: 'var(--c-claude)' },
   { id: 'drive',  name: 'Google Drive',    sub: 'meeting-notes 폴더', c: 'var(--c-drive)' },
-  { id: 'app',    name: '미팅 노트 앱',    sub: '/api/ingest · DB',  c: 'var(--c-app)' },
-  { id: 'admin',  name: '관리자 · 참여자', sub: '앱 화면',          c: 'var(--c-admin)' },
+  { id: 'app',    name: '미팅 노트 앱',    sub: '초안 · 승인 · 공개', c: 'var(--c-app)' },
 ];
 const IDX = Object.fromEntries(ACT.map((a, i) => [a.id, i]));
 const cx = (id) => GUT + COLW * (IDX[id] + 0.5);
 
 const STEPS = [
-  { t: 'phase', kind: 'human', title: '시작', tag: '사용자' },
-  { t: 'msg', from: 'user', to: 'claude', lines: ['"이 미팅 노트 앱으로 보내줘"', '(미팅 내용을 대화에 붙여넣기)'] },
+  { t: 'phase', kind: 'skill', title: '스킬이 하는 일', tag: '자동' },
+  { t: 'msg', from: 'user', to: 'claude', lines: ['"이 미팅 노트 앱으로 보내줘"'] },
+  { t: 'msg', from: 'claude', to: 'drive', lines: ['미팅 내용을 .md 파일로 저장'], sub: '원문은 본인 Drive에만 보관' },
+  { t: 'msg', from: 'claude', to: 'app', lines: ['새 파일인지 확인 (check)'], sub: '이미 처리했거나 확정된 파일은 제외' },
+  { t: 'note', at: 'claude', w: 330, lines: ['대화에 나온 내용만 추출 (추측·생성 금지)', '제목 · 참여자 · 요약 · 결정 · 액션아이템'] },
+  { t: 'msg', from: 'claude', to: 'app', lines: ['정리된 결과만 초안으로 제출 (submit)'], sub: '원문 전송 없음' },
+  { t: 'msg', from: 'claude', to: 'user', dash: true, lines: ['결과 보고: "앱에서 확인 후 승인 요청"'] },
 
-  { t: 'phase', kind: 'skill', title: '1단계 · 미팅 내용 저장', tag: '스킬' },
-  { t: 'msg', from: 'claude', to: 'drive', lines: ['미팅 전체를 .md로 저장', 'YYYY-MM-DD_제목.md'], sub: 'G: 드라이브 우선, 없으면 Drive 커넥터 · 덮어쓰기 금지' },
-  { t: 'msg', from: 'drive', to: 'claude', dash: true, lines: ['저장 확인'], sub: '다시 열어 내용 확인 · 실패하면 중단' },
-
-  { t: 'phase', kind: 'skill', title: '2-1 · 처리할 파일 가려내기', tag: '스킬' },
-  { t: 'msg', from: 'claude', to: 'drive', lines: ['폴더의 .md 파일', '목록 요청'] },
-  { t: 'msg', from: 'drive', to: 'claude', dash: true, lines: ['파일 ID · 이름 · 수정일'] },
-  { t: 'note', at: 'claude', w: 250, lines: ['각 파일 내용의 SHA-256', '앞 16자(해시)를 계산'] },
-  { t: 'msg', from: 'claude', to: 'app', lines: ['POST /api/ingest  mode: check', '[ { 파일 ID, 해시 } ]'], sub: '키는 헤더 x-automation-key로만 전송' },
-  { t: 'msg', from: 'app', to: 'claude', dash: true, lines: ['new · changed · unchanged · locked', '+ 기존 프로젝트 이름 목록'] },
-  { t: 'note', at: 'claude', w: 300, tone: 'warn', lines: ['new·changed 파일만 분석해요', 'unchanged·locked는 건너뛰어요', '401(키 불일치)이면 중단하고 알려요'] },
-
-  { t: 'phase', kind: 'skill', title: '2-2 · 파일별 분석 (Claude가 직접)', tag: '스킬' },
-  { t: 'note', at: 'claude', w: 340, lines: [
-      '① 비밀값(API 키·비밀번호)이 보이면 그 파일은 제외',
-      '② 대화에 나온 내용만 뽑아요 (지어내지 않음)',
-      '    제목 · 날짜 · 프로젝트 · 참여자',
-      '    개요 · 결정 사항 · 열린 질문',
-      '    액션아이템 (담당자 · 기한)',
-      '③ "금요일" 같은 상대 날짜는 미팅 날짜 기준으로 계산'] },
-
-  { t: 'phase', kind: 'skill', title: '2-3 · 앱에 제출 (초안으로)', tag: '스킬' },
-  { t: 'msg', from: 'claude', to: 'app', lines: ['POST /api/ingest  mode: submit', '정리된 결과만 전송 (원문 없음)'], sub: 'file{ID·이름·해시·날짜} + meeting{제목·참여자·요약·액션아이템}' },
-  { t: 'note', at: 'app', w: 290, lines: ['초안 생성 또는 갱신', '프로젝트·참여자 자동 등록', '승인 전에는 참여자에게 비공개', '(이미 확정된 미팅은 덮어쓰지 않음)'] },
-  { t: 'msg', from: 'app', to: 'claude', dash: true, lines: ['created · updated · unchanged · locked', '+ 담당자 미지정 개수'] },
-  { t: 'note', at: 'claude', w: 340, tone: 'warn', lines: ['오류가 난 파일은 건너뛰고 다음 파일을 계속 처리해요', '429(시간당 30개 초과)·네트워크 차단이면 중단하고 보고'] },
-
-  { t: 'phase', kind: 'skill', title: '3단계 · 최종 보고', tag: '스킬' },
-  { t: 'msg', from: 'claude', to: 'user', dash: true, lines: ['저장 경로 · 처리 결과', '담당자 미지정 개수'], sub: '"앱에서 확인하고 승인해 주세요"' },
-
-  { t: 'phase', kind: 'human', title: '이후 · 앱에서 사람이 하는 일', tag: '사람' },
-  { t: 'msg', from: 'app', to: 'admin', lines: ['30초마다 확인', '→ "새 미팅이 도착했어요" 팝업'] },
-  { t: 'msg', from: 'admin', to: 'app', lines: ['내용 확인 · 수정', '담당자 지정 → 승인'], sub: '승인 전에는 참여자에게 보이지 않아요' },
-  { t: 'msg', from: 'app', to: 'admin', dash: true, lines: ['확정 · 참여자별 링크 발급', '("새 링크 받기")'] },
-  { t: 'msg', from: 'admin', to: 'app', lines: ['참여자가 자기 링크에서', '내 할 일 체크'], sub: '체크하면 바로 저장돼요' },
+  { t: 'phase', kind: 'human', title: '사람이 하는 일', tag: '앱 화면' },
+  { t: 'msg', from: 'app', to: 'user', dash: true, lines: ['"새 미팅 도착" 팝업'] },
+  { t: 'msg', from: 'user', to: 'app', lines: ['내용 확인 · 담당자 지정 → 승인'], sub: '승인 후 참여자에게 공개' },
 ];
 
 const svg = document.getElementById('seq');
