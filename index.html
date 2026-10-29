@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<title>미팅 노트 스킬 시퀀스</title>
+<style>
+:root{
+  --bg:#F6F2EA; --card:#FFFDF8; --ink:#2B2926; --mu:#6F695F; --line:#CFC6B5; --chip:#EDE6D8;
+  --skill:#E7EEF6; --app:#F8EBDD; --human:#EFE8F5; --note:#FFFDF8; --warn:#9A4B2A;
+  --c-user:#C17B8C; --c-claude:#5B7FA6; --c-drive:#5E9A8F; --c-app:#C98B4B; --c-admin:#8A74A8;
+  --sans:"Pretendard Variable",Pretendard,system-ui,-apple-system,"Apple SD Gothic Neo","Noto Sans KR","Malgun Gothic",sans-serif;
+  color-scheme:light dark;
+}
+@media (prefers-color-scheme:dark){
+  :root{--bg:#17191E;--card:#22252B;--ink:#ECE9E2;--mu:#A3A8B2;--line:#4A4F5A;--chip:#2E323A;
+    --skill:#1E2A3A;--app:#33281C;--human:#2A2336;--note:#22252B;--warn:#E39A7B;
+    --c-user:#E08DA3;--c-claude:#7FA6D6;--c-drive:#6FC2B3;--c-app:#E0A663;--c-admin:#B39DDB}
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:400 15px/1.6 var(--sans);letter-spacing:-.01em}
+.wrap{max-width:1100px;margin:0 auto;padding:28px 18px 56px}
+h1{font:500 26px/1.35 var(--sans);letter-spacing:-.03em;margin:0 0 4px}
+.sub{color:var(--mu);font-size:14px;margin:0 0 16px;word-break:keep-all}
+.legend{display:flex;flex-wrap:wrap;gap:8px 16px;font-size:13px;color:var(--mu);margin:0 0 14px}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.sw{width:14px;height:14px;border-radius:4px;display:inline-block}
+.ln{width:26px;height:0;border-top:2px solid var(--ink);display:inline-block}
+.ln.d{border-top-style:dashed}
+.diagram{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:10px;overflow:auto}
+svg{display:block;width:100%;height:auto;min-width:760px}
+svg text{font-family:var(--sans)}
+.t{fill:var(--ink);font-size:13px;paint-order:stroke;stroke:var(--card);stroke-width:5px;stroke-linejoin:round}
+.t2{fill:var(--mu);font-size:11.5px;paint-order:stroke;stroke:var(--card);stroke-width:5px;stroke-linejoin:round}
+.ph{font-size:13px;font-weight:600;fill:var(--ink)}
+.phtag{font-size:11px;fill:var(--mu)}
+.nt{fill:var(--ink);font-size:12px}
+.nt.w{fill:var(--warn)}
+.nn{fill:#fff;font-size:11px;font-weight:600}
+.an{fill:#fff;font-size:14px;font-weight:600}
+.as{fill:var(--mu);font-size:11px}
+.rules{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:16px}
+.rule{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px 16px;font-size:14px;word-break:keep-all}
+.rule b{display:block;margin-bottom:2px}
+@media (max-width:720px){.rules{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>미팅 노트 스킬 — 실행 시퀀스</h1>
+  <p class="sub">"이 미팅 노트 앱으로 보내줘"라고 말하면 일어나는 일을 순서대로 정리했어요. 스킬은 <b>초안까지만</b> 만들고, 공개(승인)는 사람이 앱에서 합니다.</p>
+  <div class="legend">
+    <span><i class="ln"></i> 요청</span>
+    <span><i class="ln d"></i> 응답·결과</span>
+    <span><i class="sw" style="background:var(--skill);border:1px solid var(--line)"></i> 스킬이 하는 일</span>
+    <span><i class="sw" style="background:var(--human);border:1px solid var(--line)"></i> 사람이 하는 일</span>
+    <span><i class="sw" style="background:var(--note);border:1px solid var(--line)"></i> 처리 내용(메모)</span>
+  </div>
+  <div class="diagram"><svg id="seq" role="img" aria-label="미팅 노트 스킬 실행 시퀀스 다이어그램"></svg></div>
+  <div class="rules">
+    <div class="rule"><b>원문은 앱에 보내지 않아요</b>앱에는 정리된 결과(제목·참여자·요약·액션아이템)만 전달돼요. 원문은 내 Drive 폴더에만 남아요.</div>
+    <div class="rule"><b>자동은 "초안"까지예요</b>승인하기 전에는 참여자에게 보이지 않아요. 같은 파일을 다시 보내도 중복되지 않아요.</div>
+    <div class="rule"><b>키는 화면에 출력하지 않아요</b>자동화 키는 요청 헤더로만 쓰고, 보고나 파일에 적지 않아요.</div>
+  </div>
+</div>
+
+<script>
+// 시퀀스 다이어그램을 데이터로 그립니다. 단계를 고치려면 아래 STEPS만 바꾸면 됩니다.
+const NS = 'http://www.w3.org/2000/svg';
+const W = 1040, GUT = 44, COLW = (W - GUT - 8) / 5;
+const ACT = [
+  { id: 'user',   name: '사용자',          sub: '요청·확인',        c: 'var(--c-user)' },
+  { id: 'claude', name: 'Claude (스킬)',   sub: '저장·분석·제출',   c: 'var(--c-claude)' },
+  { id: 'drive',  name: 'Google Drive',    sub: 'meeting-notes 폴더', c: 'var(--c-drive)' },
+  { id: 'app',    name: '미팅 노트 앱',    sub: '/api/ingest · DB',  c: 'var(--c-app)' },
+  { id: 'admin',  name: '관리자 · 참여자', sub: '앱 화면',          c: 'var(--c-admin)' },
+];
+const IDX = Object.fromEntries(ACT.map((a, i) => [a.id, i]));
+const cx = (id) => GUT + COLW * (IDX[id] + 0.5);
+
+const STEPS = [
+  { t: 'phase', kind: 'human', title: '시작', tag: '사용자' },
+  { t: 'msg', from: 'user', to: 'claude', lines: ['"이 미팅 노트 앱으로 보내줘"', '(미팅 내용을 대화에 붙여넣기)'] },
+
+  { t: 'phase', kind: 'skill', title: '1단계 · 미팅 내용 저장', tag: '스킬' },
+  { t: 'msg', from: 'claude', to: 'drive', lines: ['미팅 전체를 .md로 저장', 'YYYY-MM-DD_제목.md'], sub: 'G: 드라이브 우선, 없으면 Drive 커넥터 · 덮어쓰기 금지' },
+  { t: 'msg', from: 'drive', to: 'claude', dash: true, lines: ['저장 확인'], sub: '다시 열어 내용 확인 · 실패하면 중단' },
+
+  { t: 'phase', kind: 'skill', title: '2-1 · 처리할 파일 가려내기', tag: '스킬' },
+  { t: 'msg', from: 'claude', to: 'drive', lines: ['폴더의 .md 파일', '목록 요청'] },
+  { t: 'msg', from: 'drive', to: 'claude', dash: true, lines: ['파일 ID · 이름 · 수정일'] },
+  { t: 'note', at: 'claude', w: 250, lines: ['각 파일 내용의 SHA-256', '앞 16자(해시)를 계산'] },
+  { t: 'msg', from: 'claude', to: 'app', lines: ['POST /api/ingest  mode: check', '[ { 파일 ID, 해시 } ]'], sub: '키는 헤더 x-automation-key로만 전송' },
+  { t: 'msg', from: 'app', to: 'claude', dash: true, lines: ['new · changed · unchanged · locked', '+ 기존 프로젝트 이름 목록'] },
+  { t: 'note', at: 'claude', w: 300, tone: 'warn', lines: ['new·changed 파일만 분석해요', 'unchanged·locked는 건너뛰어요', '401(키 불일치)이면 중단하고 알려요'] },
+
+  { t: 'phase', kind: 'skill', title: '2-2 · 파일별 분석 (Claude가 직접)', tag: '스킬' },
+  { t: 'note', at: 'claude', w: 340, lines: [
+      '① 비밀값(API 키·비밀번호)이 보이면 그 파일은 제외',
+      '② 대화에 나온 내용만 뽑아요 (지어내지 않음)',
+      '    제목 · 날짜 · 프로젝트 · 참여자',
+      '    개요 · 결정 사항 · 열린 질문',
+      '    액션아이템 (담당자 · 기한)',
+      '③ "금요일" 같은 상대 날짜는 미팅 날짜 기준으로 계산'] },
+
+  { t: 'phase', kind: 'skill', title: '2-3 · 앱에 제출 (초안으로)', tag: '스킬' },
+  { t: 'msg', from: 'claude', to: 'app', lines: ['POST /api/ingest  mode: submit', '정리된 결과만 전송 (원문 없음)'], sub: 'file{ID·이름·해시·날짜} + meeting{제목·참여자·요약·액션아이템}' },
+  { t: 'note', at: 'app', w: 290, lines: ['초안 생성 또는 갱신', '프로젝트·참여자 자동 등록', '승인 전에는 참여자에게 비공개', '(이미 확정된 미팅은 덮어쓰지 않음)'] },
+  { t: 'msg', from: 'app', to: 'claude', dash: true, lines: ['created · updated · unchanged · locked', '+ 담당자 미지정 개수'] },
+  { t: 'note', at: 'claude', w: 340, tone: 'warn', lines: ['오류가 난 파일은 건너뛰고 다음 파일을 계속 처리해요', '429(시간당 30개 초과)·네트워크 차단이면 중단하고 보고'] },
+
+  { t: 'phase', kind: 'skill', title: '3단계 · 최종 보고', tag: '스킬' },
+  { t: 'msg', from: 'claude', to: 'user', dash: true, lines: ['저장 경로 · 처리 결과', '담당자 미지정 개수'], sub: '"앱에서 확인하고 승인해 주세요"' },
+
+  { t: 'phase', kind: 'human', title: '이후 · 앱에서 사람이 하는 일', tag: '사람' },
+  { t: 'msg', from: 'app', to: 'admin', lines: ['30초마다 확인', '→ "새 미팅이 도착했어요" 팝업'] },
+  { t: 'msg', from: 'admin', to: 'app', lines: ['내용 확인 · 수정', '담당자 지정 → 승인'], sub: '승인 전에는 참여자에게 보이지 않아요' },
+  { t: 'msg', from: 'app', to: 'admin', dash: true, lines: ['확정 · 참여자별 링크 발급', '("새 링크 받기")'] },
+  { t: 'msg', from: 'admin', to: 'app', lines: ['참여자가 자기 링크에서', '내 할 일 체크'], sub: '체크하면 바로 저장돼요' },
+];
+
+const svg = document.getElementById('seq');
+const el = (name, attrs = {}, parent = svg, text) => {
+  const e = document.createElementNS(NS, name);
+  for (const k in attrs) e.setAttribute(k, attrs[k]);
+  if (text !== undefined) e.textContent = text;
+  parent.appendChild(e); return e;
+};
+
+// 1) 위치 계산
+const TOP = 78, LINE = 18;
+let y = TOP, n = 0, band = null;
+const bands = [], items = [];
+for (const s of STEPS) {
+  if (s.t === 'phase') {
+    if (band) { band.y2 = y + 6; bands.push(band); y += 12; }
+    band = { kind: s.kind, title: s.title, tag: s.tag, y1: y };
+    y += 36;
+  } else if (s.t === 'msg') {
+    n++;
+    const top = y + 8;
+    const ay = top + s.lines.length * LINE + 12;
+    items.push({ ...s, n, ay, top });
+    y = ay + (s.sub ? 20 : 10) + 10;
+  } else if (s.t === 'note') {
+    n++;
+    const h = s.lines.length * 17 + 16;
+    items.push({ ...s, n, ny: y + 6, h });
+    y += h + 16;
+  }
+}
+band.y2 = y + 4; bands.push(band);
+const H = y + 90;
+svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+
+// 2) 단계 묶음(배경 띠)
+for (const b of bands) {
+  el('rect', { x: 4, y: b.y1, width: W - 8, height: b.y2 - b.y1, rx: 12, fill: `var(--${b.kind})` });
+  el('text', { x: 18, y: b.y1 + 23, class: 'ph' }, svg, b.title);
+  el('text', { x: W - 18, y: b.y1 + 23, class: 'phtag', 'text-anchor': 'end' }, svg, b.tag);
+}
+
+// 3) 생명선(세로 점선)과 위·아래 이름표
+const actorBox = (a, yy) => {
+  const x = cx(a.id);
+  el('rect', { x: x - 82, y: yy, width: 164, height: 50, rx: 12, fill: a.c });
+  el('text', { x, y: yy + 22, class: 'an', 'text-anchor': 'middle' }, svg, a.name);
+  el('text', { x, y: yy + 39, class: 'an', 'text-anchor': 'middle', style: 'font-size:11px;font-weight:400;opacity:.92' }, svg, a.sub);
+};
+for (const a of ACT) {
+  el('line', { x1: cx(a.id), y1: 62, x2: cx(a.id), y2: H - 76, stroke: 'var(--line)', 'stroke-width': 1.5, 'stroke-dasharray': '4 5' });
+  actorBox(a, 10);
+  actorBox(a, H - 66);
+}
+
+// 4) 화살표와 메모
+const badge = (yy, label) => {
+  el('circle', { cx: 24, cy: yy, r: 10, fill: 'var(--mu)' });
+  el('text', { x: 24, y: yy + 4, class: 'nn', 'text-anchor': 'middle' }, svg, label);
+};
+for (const it of items) {
+  if (it.t === 'msg') {
+    const x1 = cx(it.from), x2 = cx(it.to), dir = x2 > x1 ? 1 : -1;
+    const col = ACT[IDX[it.from]].c, mid = (x1 + x2) / 2;
+    badge(it.ay, it.n);
+    it.lines.forEach((l, i) => el('text', { x: mid, y: it.top + 12 + i * LINE, class: 't', 'text-anchor': 'middle' }, svg, l));
+    el('line', { x1: x1 + dir * 4, y1: it.ay, x2: x2 - dir * 9, y2: it.ay, stroke: col, 'stroke-width': 2.2, 'stroke-dasharray': it.dash ? '6 5' : '' });
+    el('polygon', { points: `${x2},${it.ay} ${x2 - dir * 10},${it.ay - 5} ${x2 - dir * 10},${it.ay + 5}`, fill: col });
+    if (it.sub) el('text', { x: mid, y: it.ay + 17, class: 't2', 'text-anchor': 'middle' }, svg, it.sub);
+  } else {
+    const col = ACT[IDX[it.at]].c;
+    let x = cx(it.at) - it.w / 2;
+    x = Math.max(GUT + 4, Math.min(W - it.w - 8, x));
+    badge(it.ny + it.h / 2, it.n);
+    el('rect', { x, y: it.ny, width: it.w, height: it.h, rx: 8, fill: 'var(--note)', stroke: it.tone === 'warn' ? 'var(--warn)' : col, 'stroke-width': 1.6 });
+    it.lines.forEach((l, i) => el('text', { x: x + 12, y: it.ny + 21 + i * 17, class: 'nt' + (it.tone === 'warn' ? ' w' : ''), 'xml:space': 'preserve' }, svg, l));
+  }
+}
+</script>
+</body>
+</html>
